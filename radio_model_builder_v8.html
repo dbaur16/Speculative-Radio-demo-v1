@@ -1,0 +1,550 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1208;color:#e8d5a3;font-family:'Georgia',serif}
+.app{max-width:920px;margin:0 auto;padding:0 0 60px}
+.header{text-align:center;padding:24px 0 16px;border-bottom:1px solid #3a2a10}
+.header h1{font-size:12px;letter-spacing:4px;text-transform:uppercase;color:#c09040;font-family:'Courier New',monospace;margin-bottom:5px}
+.header h2{font-size:26px;font-weight:normal;color:#f0e0b0}
+.tab-bar{display:flex;gap:3px;padding:10px 10px 0;background:#0e0a04;border-bottom:2px solid #4a3010}
+.tab-btn{flex:1;padding:13px 6px;text-align:center;font-size:13px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Courier New',monospace;font-weight:bold;border-radius:6px 6px 0 0;border:2px solid #8a6820;border-bottom:none;transition:background 0.15s}
+.tab-btn:hover{background:#f8e878 !important;color:#0a0600 !important}
+.panel{display:none;padding:20px 16px}
+.panel.active{display:block}
+.dj-board{background:#1c1408;border:2px solid #4a3010;border-radius:14px;padding:18px 16px 14px}
+.board-label{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:#5a4020;font-family:'Courier New',monospace;text-align:center;margin-bottom:14px}
+.board-main{display:grid;grid-template-columns:60px 1fr 180px 1fr 52px;gap:10px;margin-bottom:14px}
+.side-col{display:flex;flex-direction:column;align-items:center;justify-content:space-between;background:#141008;border:1px solid #3a2410;border-radius:8px;padding:12px 6px}
+.side-lbl-vert{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#7a5830;font-family:'Courier New',monospace;writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;line-height:1.4}
+
+.archive-switch{width:36px;height:72px;background:#0a0804;border:2px solid #3a2a10;border-radius:18px;position:relative;cursor:pointer;transition:all 0.2s;flex-shrink:0}
+.archive-switch.archive{background:#0e0c18;border-color:#4a3880}
+.archive-switch.contemporary{background:#0e1808;border-color:#3a7020}
+.archive-knob{width:28px;height:28px;border-radius:50%;position:absolute;left:2px;transition:all 0.25s;display:flex;align-items:center;justify-content:center;font-size:13px}
+.archive-switch.archive .archive-knob{bottom:2px;background:#2a2040;border:2px solid #7060c0}
+.archive-switch.contemporary .archive-knob{bottom:calc(100% - 30px);background:#1a3010;border:2px solid #60a030}
+.archive-mode-label{font-size:9px;font-family:'Courier New',monospace;text-align:center;line-height:1.4;max-width:48px}
+.archive-switch.archive ~ .archive-mode-label{color:#9080e0}
+.archive-switch.contemporary ~ .archive-mode-label{color:#70c040}
+
+.channel{background:#161008;border:1px solid #3a2410;border-radius:10px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.channel-label{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#a07840;font-family:'Courier New',monospace;text-align:center}
+.platter{width:120px;height:120px;border-radius:50%;background:#0e0a04;border:3px solid #3a2410;display:flex;align-items:center;justify-content:center}
+.platter-ring{width:100px;height:100px;border-radius:50%;border:2px solid #2a1a08;display:flex;align-items:center;justify-content:center}
+.platter-ring2{width:70px;height:70px;border-radius:50%;background:#1a1008;border:2px solid #3a2410;display:flex;align-items:center;justify-content:center}
+.platter-center{width:20px;height:20px;border-radius:50%;background:#3a2810;border:1px solid #6a4820}
+.knobs-row{display:flex;justify-content:center;gap:12px}
+.knob-unit{display:flex;flex-direction:column;align-items:center;gap:4px}
+.knob-unit canvas{cursor:ns-resize;display:block}
+.knob-lbl{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#9a7040;font-family:'Courier New',monospace;text-align:center;line-height:1.4;max-width:56px}
+.knob-val{font-size:13px;font-family:'Courier New',monospace;color:#e8b030;font-weight:bold}
+
+.center-col{background:#141008;border:1px solid #3a2410;border-radius:10px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:0}
+.center-lbl{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7a5830;font-family:'Courier New',monospace;text-align:center;margin-bottom:12px}
+.fader-bank{display:flex;gap:14px;justify-content:center;align-items:flex-end;flex:1}
+.fader-unit{display:flex;flex-direction:column;align-items:center;gap:6px}
+.fader-track{width:14px;background:#0a0804;border:1px solid #2a1a08;border-radius:7px;position:relative;cursor:ns-resize}
+.fader-thumb{width:30px;height:18px;background:#4a3410;border:2px solid #9a6820;border-radius:3px;position:absolute;left:50%;transform:translateX(-50%);cursor:ns-resize}
+.fader-thumb:hover,.fader-thumb.dragging{background:#7a5018}
+.fader-thumb::after{content:'';position:absolute;top:50%;left:5px;right:5px;height:1px;background:#c09030;transform:translateY(-50%)}
+.fader-lbl{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#7a5830;font-family:'Courier New',monospace;text-align:center;max-width:42px;line-height:1.3}
+.fader-val{font-size:12px;font-family:'Courier New',monospace;color:#e8b030;font-weight:bold}
+
+.entropy-fader-track{width:14px;background:#0a0804;border:1px solid #2a1a08;border-radius:7px;position:relative;cursor:ns-resize}
+.entropy-fader-thumb{width:28px;height:18px;background:#4a3410;border:2px solid #9a6820;border-radius:3px;position:absolute;left:50%;transform:translateX(-50%);cursor:ns-resize}
+.entropy-fader-thumb:hover,.entropy-fader-thumb.dragging{background:#7a5018}
+.entropy-fader-thumb::after{content:'';position:absolute;top:50%;left:4px;right:4px;height:1px;background:#c09030;transform:translateY(-50%)}
+
+.pads-section{background:#161008;border:1px solid #3a2410;border-radius:10px;padding:14px;margin-bottom:14px}
+.pads-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.pads-title{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#a07840;font-family:'Courier New',monospace}
+.pads-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.pad{height:46px;border-radius:6px;border:1px solid #2a1a08;cursor:pointer;transition:all 0.12s;display:flex;align-items:center;justify-content:center;font-size:12px;letter-spacing:1px;text-transform:uppercase;font-family:'Courier New',monospace;text-align:center;padding:4px;line-height:1.3;font-weight:bold;position:relative}
+.pad.region-on{border-width:2px;border-color:#c09030;color:#f0d060}
+.pad.region-off{color:#7a5838}
+.pad.custom{border-style:dashed}
+.pad-remove{position:absolute;top:2px;right:4px;font-size:10px;color:#6a4020;cursor:pointer;line-height:1;display:none}
+.pad:hover .pad-remove{display:block}
+.pad-remove:hover{color:#e06040}
+.add-pad-row{display:flex;gap:8px;margin-top:12px;align-items:center}
+.add-pad-input{flex:1;background:#0e0a04;border:1px solid #3a2410;border-radius:5px;padding:8px 12px;color:#e8d5a3;font-family:'Courier New',monospace;font-size:13px;outline:none}
+.add-pad-input:focus{border-color:#8a6020}
+.add-pad-input::placeholder{color:#4a3418}
+.add-pad-btn{padding:8px 16px;background:#d4b060;border:2px solid #c09020;border-radius:5px;color:#0e0800;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;font-weight:bold;white-space:nowrap;transition:background 0.15s}
+.add-pad-btn:hover{background:#f8e060}
+
+.station-name-bar{background:#0e0a04;border:1px solid #4a3010;border-radius:8px;padding:12px 20px;display:flex;align-items:center;gap:14px}
+.station-name-bar label{font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#9a7040;font-family:'Courier New',monospace;white-space:nowrap}
+.station-name-input{flex:1;background:transparent;border:none;border-bottom:1px solid #4a3010;padding:6px 4px;color:#f0d060;font-family:'Courier New',monospace;font-size:18px;outline:none}
+.station-name-input:focus{border-bottom-color:#d4a020}
+.station-name-input::placeholder{color:#3a2810}
+.train-success{display:none;padding:10px 16px;font-family:'Courier New',monospace;font-size:11px;letter-spacing:2px;border:1px solid #3a4020;border-radius:7px;background:#0e1008;margin-top:10px}
+.now-playing-card{background:#1e1608;border:1px solid #4a3418;border-radius:10px;padding:22px;margin-bottom:16px}
+.station-identity{display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #2a1e0e}
+.station-icon{width:48px;height:48px;border-radius:50%;background:#2a1e06;border:1px solid #6a4010;display:flex;align-items:center;justify-content:center;font-size:20px}
+.station-info h3{font-size:18px;font-weight:normal;color:#f0d080;margin-bottom:3px}
+.station-info p{font-size:12px;letter-spacing:2px;color:#7a5830;font-family:'Courier New',monospace;text-transform:uppercase}
+.on-air-badge{margin-left:auto;padding:5px 12px;background:#3a0e0e;border:1px solid #7a2010;border-radius:4px;font-size:10px;letter-spacing:3px;color:#e06040;font-family:'Courier New',monospace;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.track-title{font-size:17px;color:#e8d0a0;margin-bottom:5px}
+.track-meta{font-size:12px;color:#7a6040;font-family:'Courier New',monospace}
+.progress-bar-wrap{height:4px;background:#2a1e0e;border-radius:2px;margin:12px 0;overflow:hidden}
+.progress-bar-fill{height:100%;background:#c08020;border-radius:2px;transition:width 0.5s linear}
+.play-controls{display:flex;align-items:center;gap:10px;margin-top:8px}
+.ctrl-btn{background:#1a1208;border:1px solid #4a3010;border-radius:50%;width:36px;height:36px;color:#c09040;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.15s}
+.ctrl-btn:hover{border-color:#c09030;color:#e8c050}
+.ctrl-btn.play{width:46px;height:46px;font-size:17px;background:#4a2e08;border:2px solid #c08020;color:#f8e060}
+.ctrl-btn.play:hover{background:#6a4010}
+.vol-row{display:flex;align-items:center;gap:8px;margin-left:auto}
+.vol-row input{width:80px;accent-color:#c08020}
+.queue-list{border:1px solid #2a1e0e;border-radius:8px;overflow:hidden}
+.queue-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #1a1208;font-size:13px;cursor:pointer;transition:background 0.1s}
+.queue-item:last-child{border-bottom:none}
+.queue-item:hover{background:#1e1408}
+.q-num{width:20px;font-size:11px;color:#5a4020;font-family:'Courier New',monospace;text-align:right}
+.q-title{flex:1;color:#c8b080}
+.q-origin{font-size:11px;color:#7a5830;font-family:'Courier New',monospace}
+.q-dur{font-size:11px;color:#5a4020;font-family:'Courier New',monospace;width:36px;text-align:right}
+.waveform-canvas{width:100%;height:44px;display:block;margin:8px 0}
+.stations-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.station-card{background:#1e1608;border:1px solid #3a2810;border-radius:10px;padding:18px;transition:border-color 0.2s}
+.station-card:hover{border-color:#7a5020}
+.s-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.s-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;border:1px solid #3a2810;flex-shrink:0}
+.s-name{font-size:15px;color:#e8d0a0}
+.s-curator{font-size:11px;color:#7a5830;font-family:'Courier New',monospace;margin-top:2px}
+.s-bio{font-size:12px;color:#8a7050;line-height:1.6;margin-bottom:12px}
+.s-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.s-tag{font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border:1px solid #3a2810;border-radius:3px;color:#8a6840;font-family:'Courier New',monospace}
+.s-dial-row{display:flex;gap:5px;margin-bottom:2px}
+.s-dial-mini{flex:1;height:4px;background:#120e06;border-radius:2px;overflow:hidden}
+.s-dial-fill{height:100%;border-radius:2px;background:#c08020}
+.crypto-footer{margin-top:22px;padding:14px 18px;border:1px solid #2a1e0e;border-radius:8px;background:#100e06;display:flex;align-items:center;gap:14px}
+.crypto-dot{width:8px;height:8px;border-radius:50%;background:#3a8040;flex-shrink:0;animation:pulse 3s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.crypto-text{font-size:12px;color:#6a7050;font-family:'Courier New',monospace;line-height:1.6}
+.crypto-text strong{color:#8a9060}
+.empty-state{text-align:center;padding:48px 24px;color:#5a4830;font-size:14px;font-family:'Courier New',monospace;letter-spacing:2px}
+</style>
+
+<div class="app">
+  <div class="header">
+    <h1>Speculative Radio</h1>
+    <h2>Train Your Own Station</h2>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn" id="tab-btn-build" onclick="switchTab('build')" style="background:#f8e060;color:#1a0800;border-color:#c09020">① Build Model</button>
+    <button class="tab-btn" id="tab-btn-broadcast" onclick="switchTab('broadcast')" style="background:#c8a050;color:#1a0800;border-color:#8a6820">② Broadcast</button>
+    <button class="tab-btn" id="tab-btn-tunein" onclick="switchTab('tunein')" style="background:#c8a050;color:#1a0800;border-color:#8a6820">③ Tune In</button>
+  </div>
+
+  <div class="panel active" id="tab-build">
+    <div class="dj-board">
+      <div class="board-label">Model Configuration Panel</div>
+      <div class="board-main" id="board-main">
+
+        <!-- LEFT: Archive / Contemporary flip -->
+        <div class="side-col" id="side-left">
+          <div class="side-lbl-vert">Corpus Mode</div>
+          <div class="archive-switch contemporary" id="archive-switch" onclick="toggleArchive()">
+            <div class="archive-knob" id="archive-knob">🌿</div>
+          </div>
+          <div class="archive-mode-label" id="archive-mode-label">Contemporary</div>
+        </div>
+
+        <!-- CHANNEL 1 -->
+        <div class="channel" id="ch1">
+          <div class="channel-label">Channel 1</div>
+          <div class="platter"><div class="platter-ring"><div class="platter-ring2"><div class="platter-center"></div></div></div></div>
+          <div class="knobs-row">
+            <div class="knob-unit">
+              <canvas id="knob-0" width="52" height="52"></canvas>
+              <div class="knob-lbl">Rhythmic Complexity</div>
+              <div class="knob-val" id="cv-0">70</div>
+            </div>
+            <div class="knob-unit">
+              <canvas id="knob-1" width="52" height="52"></canvas>
+              <div class="knob-lbl">Era Weight</div>
+              <div class="knob-val" id="cv-1">50</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;width:100%;padding:0 4px">
+            <span style="font-size:9px;color:#5a4020;font-family:'Courier New',monospace">pre-1900</span>
+            <span style="font-size:9px;color:#5a4020;font-family:'Courier New',monospace">present</span>
+          </div>
+        </div>
+
+        <!-- CENTER MIXER — now 3 faders -->
+        <div class="center-col" id="mixer">
+          <div class="center-lbl">Mixer</div>
+          <div class="fader-bank">
+            <div class="fader-unit">
+              <div class="fader-track" id="fader-track-2" style="height:160px"><div class="fader-thumb" id="fader-thumb-2" style="bottom:calc(40% - 9px)"></div></div>
+              <div class="fader-lbl">Tempo Variance</div>
+              <div class="fader-val" id="cv-2">40</div>
+            </div>
+            <div class="fader-unit">
+              <div class="fader-track" id="fader-track-3" style="height:160px"><div class="fader-thumb" id="fader-thumb-3" style="bottom:calc(60% - 9px)"></div></div>
+              <div class="fader-lbl">Timbre Texture</div>
+              <div class="fader-val" id="cv-3">60</div>
+            </div>
+            <div class="fader-unit">
+              <div class="fader-track" id="fader-track-7" style="height:160px"><div class="fader-thumb" id="fader-thumb-7" style="bottom:calc(50% - 9px)"></div></div>
+              <div class="fader-lbl">Tonal System</div>
+              <div class="fader-val" id="cv-7">50</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHANNEL 2 -->
+        <div class="channel" id="ch2">
+          <div class="channel-label">Channel 2</div>
+          <div class="platter"><div class="platter-ring"><div class="platter-ring2"><div class="platter-center"></div></div></div></div>
+          <div class="knobs-row">
+            <div class="knob-unit">
+              <canvas id="knob-5" width="52" height="52"></canvas>
+              <div class="knob-lbl">Timbral Density</div>
+              <div class="knob-val" id="cv-5">55</div>
+            </div>
+            <div class="knob-unit">
+              <canvas id="knob-6" width="52" height="52"></canvas>
+              <div class="knob-lbl">Harmonic Richness</div>
+              <div class="knob-val" id="cv-6">45</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Entropy Temperature -->
+        <div class="side-col" id="side-right">
+          <div class="side-lbl-vert">Entropy Temperature</div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;justify-content:center">
+            <span style="font-size:9px;color:#7a5830;font-family:'Courier New',monospace">HIGH</span>
+            <div class="entropy-fader-track" id="entropy-track" style="height:100px">
+              <div class="entropy-fader-thumb" id="entropy-thumb" style="bottom:calc(50% - 9px)"></div>
+            </div>
+            <span style="font-size:9px;color:#7a5830;font-family:'Courier New',monospace">LOW</span>
+          </div>
+          <div style="font-size:12px;font-family:'Courier New',monospace;color:#e8b030;font-weight:bold" id="entropy-val">50</div>
+        </div>
+
+      </div>
+
+      <div class="pads-section">
+        <div class="pads-header">
+          <div class="pads-title">Region Priority — tap to weight higher</div>
+          <div style="font-size:10px;color:#5a4020;font-family:'Courier New',monospace;font-style:italic">8 default regions · add your own below</div>
+        </div>
+        <div class="pads-grid" id="pads-all"></div>
+        <div class="add-pad-row">
+          <input class="add-pad-input" id="add-pad-input" type="text" placeholder="Type a region, country, or city..." maxlength="32" onkeydown="if(event.key==='Enter')addCustomPad()"/>
+          <button class="add-pad-btn" onclick="addCustomPad()">+ Add Region</button>
+        </div>
+        <div id="custom-note" style="display:none;margin-top:8px;font-size:10px;color:#5a6838;font-family:'Courier New',monospace;letter-spacing:1px">Custom regions light up in green · hover a pad to remove it</div>
+      </div>
+
+      <div class="station-name-bar">
+        <label>Station</label>
+        <input class="station-name-input" id="station-name" type="text" placeholder="Name your station..." maxlength="40"/>
+        <button onclick="trainModel()" style="padding:14px 24px;background:#d4b060;border:2px solid #c09020;border-radius:7px;color:#0e0800;font-size:13px;letter-spacing:3px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;font-weight:bold;white-space:nowrap;transition:background 0.15s" onmouseover="this.style.background='#f8e060'" onmouseout="this.style.background='#d4b060'">⬤ Train &amp; Launch</button>
+      </div>
+      <div id="train-success" class="train-success">
+        <span style="color:#d4a040">● Model trained — </span>
+        <span id="train-confirm-text" style="color:#909060"></span>
+        <span style="color:#4a5830"> · Switch to Broadcast →</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="tab-broadcast">
+    <div id="no-station-msg" class="empty-state">
+      <div>● No station configured</div>
+      <div style="margin-top:8px;font-size:12px;color:#3a2c18">Go to Build Model and train your model first</div>
+    </div>
+    <div id="broadcast-content" style="display:none">
+      <div class="now-playing-card">
+        <div class="station-identity">
+          <div class="station-icon">📻</div>
+          <div class="station-info"><h3 id="bc-name">My Station</h3><p id="bc-meta">—</p></div>
+          <div class="on-air-badge">● On Air</div>
+        </div>
+        <div class="track-title" id="bc-track">Kora Passages in D</div>
+        <div class="track-meta"><span id="bc-region">West Africa</span> · <span id="bc-genre">Mandinka / Modal</span></div>
+        <canvas class="waveform-canvas" id="waveform-canvas" height="44"></canvas>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:38%"></div></div>
+        <div class="play-controls">
+          <button class="ctrl-btn" onclick="prevTrack()">◀◀</button>
+          <button class="ctrl-btn play" id="play-btn" onclick="togglePlay()">▶</button>
+          <button class="ctrl-btn" onclick="nextTrack()">▶▶</button>
+          <div class="vol-row"><span style="color:#6a5030;font-size:14px">♪</span><input type="range" min="0" max="100" value="75" step="1"/></div>
+        </div>
+      </div>
+      <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#5a4020;font-family:'Courier New',monospace;padding:0 4px 10px">Up next — curated by your model</div>
+      <div class="queue-list" id="queue-list"></div>
+    </div>
+    <div class="crypto-footer">
+      <div class="crypto-dot"></div>
+      <div class="crypto-text"><strong>Speculative ledger active.</strong> In this future, micropayments route to artists automatically via cryptographic provenance tags. Every play generates a verifiable attribution event on an open music commons chain.</div>
+    </div>
+  </div>
+
+  <div class="panel" id="tab-tunein">
+    <div class="stations-grid" id="stations-grid"></div>
+    <div class="crypto-footer" style="margin-top:22px">
+      <div class="crypto-dot"></div>
+      <div class="crypto-text"><strong>All stations participate in the commons.</strong> Artists in all regions receive the same per-stream rate regardless of classifier origin.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_REGIONS=['West Africa','South Asia','East Asia','Middle East','Eastern Europe','Latin America','Oceania','North America'];
+const PAD_BG_OFF=['#2a1208','#0e1a08','#0e0e22','#1e1408','#1e0e18','#081818','#201808','#0e1808'];
+const PAD_BG_ON=['#6a2a08','#1a5a14','#18186a','#5a3808','#5a1844','#0a4040','#5a3808','#204a10'];
+const CUSTOM_OFF='#0a180a', CUSTOM_ON='#1a4a1a';
+let activeRegions=new Set(['West Africa','Middle East','Oceania']);
+let customRegions=[];
+const KNOB_IDS=[0,1,5,6];
+let vals={0:70,1:50,2:40,3:60,5:55,6:45,7:50};
+let archiveMode=false, entropyVal=50;
+let myStationName='';
+let playing=false,currentTrack=0,progress=38;
+let progressInterval=null,wavePhase=0;
+let dragging=null,dragY0=0,dragV0=0;
+
+const TRACKS=[
+  {title:'Kora Passages in D',region:'West Africa',genre:'Mandinka / Modal',dur:'4:12'},
+  {title:'Raag Bhairav — Alap',region:'North India',genre:'Hindustani Classical',dur:'6:40'},
+  {title:'Maqam Rast Taqsim',region:'Middle East',genre:'Ottoman / Maqam',dur:'3:55'},
+  {title:'Mbira dzaVadzimu',region:'Zimbabwe',genre:'Shona / Spirit Music',dur:'5:08'},
+  {title:'Gagaku Court Ensemble',region:'Japan',genre:'Imperial / Gagaku',dur:'7:22'},
+  {title:'Throat Singing — Tuvan',region:'Central Asia',genre:'Khoomei / Overtone',dur:'3:30'},
+  {title:'Carnatic Alapana — Todi',region:'South India',genre:'Carnatic Classical',dur:'5:50'},
+  {title:'Flamenco Puro — Soleá',region:'Andalusia',genre:'Flamenco / Deep Song',dur:'4:45'},
+];
+const STATIONS=[
+  {name:'Unmeasured Time',curator:'a. osei-mensah',icon:'🥁',bio:'Built to resist grid-quantization. Weighted toward music where tempo is felt, not counted.',tags:['polyrhythm','non-metered','oral tradition'],dials:[95,30,85,70,60,40,40]},
+  {name:'Maqam / Raga Commons',curator:'n. el-rashid',icon:'🎼',bio:'A classifier trained on non-tempered pitch systems. Microtonality as default, not exception.',tags:['microtonal','modal','no equal temperament'],dials:[30,60,40,60,80,75,90]},
+  {name:'The Instrument Itself',curator:'y. shimizu',icon:'🪕',bio:'Timbre is the story. Trained on instruments with no Western equivalent — koto, erhu, mbira, duduk.',tags:['instrumental','timbre-first','acoustic only'],dials:[40,40,50,99,90,60,60]},
+  {name:'Field Recordings FM',curator:'collective',icon:'🌿',bio:'Not music as product. Sound as place. Archive recordings from ritual, ceremony, and daily life.',tags:['field recording','ritual','non-commercial'],dials:[60,20,65,80,55,50,30]},
+];
+
+function drawKnob(id,value,isEra){
+  const canvas=document.getElementById('knob-'+id);if(!canvas)return;
+  const ctx=canvas.getContext('2d'),cx=26,cy=26,r=21;
+  ctx.clearRect(0,0,52,52);
+  const s=Math.PI*0.75,e=Math.PI*2.25,f=s+(value/100)*(e-s);
+  ctx.beginPath();ctx.arc(cx,cy,r,s,e);ctx.strokeStyle='#1a1008';ctx.lineWidth=6;ctx.lineCap='round';ctx.stroke();
+  let color;
+  if(isEra){color=value<33?'#6050b0':value<66?'#8060a0':'#b87818';}
+  else{color=value>70?'#e8b020':value>40?'#b87818':'#6a4010';}
+  ctx.beginPath();ctx.arc(cx,cy,r,s,f);ctx.strokeStyle=color;ctx.lineWidth=6;ctx.lineCap='round';ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,13,0,Math.PI*2);ctx.fillStyle='#141008';ctx.fill();
+  ctx.strokeStyle='#3a2410';ctx.lineWidth=1;ctx.stroke();
+  const ta=s+(value/100)*(e-s);
+  ctx.beginPath();ctx.moveTo(cx+Math.cos(ta)*5,cy+Math.sin(ta)*5);ctx.lineTo(cx+Math.cos(ta)*10,cy+Math.sin(ta)*10);
+  ctx.strokeStyle='#f0d040';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.stroke();
+  ctx.beginPath();ctx.arc(cx+Math.cos(ta)*15,cy+Math.sin(ta)*15,2.5,0,Math.PI*2);ctx.fillStyle='#f0d040';ctx.fill();
+}
+
+function toggleArchive(){
+  archiveMode=!archiveMode;
+  const sw=document.getElementById('archive-switch');
+  const knob=document.getElementById('archive-knob');
+  const lbl=document.getElementById('archive-mode-label');
+  sw.className='archive-switch '+(archiveMode?'archive':'contemporary');
+  knob.textContent=archiveMode?'📼':'🌿';
+  lbl.textContent=archiveMode?'Archive':'Contemporary';
+}
+
+function buildPads(){
+  const grid=document.getElementById('pads-all');grid.innerHTML='';
+  DEFAULT_REGIONS.forEach((r,i)=>grid.appendChild(makePad(r,false,i)));
+  customRegions.forEach(r=>grid.appendChild(makePad(r,true,-1)));
+}
+
+function makePad(r,isCustom,idx){
+  const on=activeRegions.has(r);
+  const pad=document.createElement('div');
+  pad.className='pad '+(on?'region-on':'region-off')+(isCustom?' custom':'');
+  if(isCustom){pad.style.background=on?CUSTOM_ON:CUSTOM_OFF;pad.style.borderColor=on?'#4a8030':'#2a4020';pad.style.color=on?'#80d060':'#4a6838';}
+  else{pad.style.background=on?PAD_BG_ON[idx]:PAD_BG_OFF[idx];}
+  pad.dataset.region=r;
+  const label=document.createElement('span');label.textContent=r;pad.appendChild(label);
+  if(isCustom){
+    const rem=document.createElement('span');rem.className='pad-remove';rem.textContent='✕';rem.title='Remove';
+    rem.onclick=(e)=>{e.stopPropagation();customRegions=customRegions.filter(x=>x!==r);activeRegions.delete(r);buildPads();if(customRegions.length===0)document.getElementById('custom-note').style.display='none';};
+    pad.appendChild(rem);
+  }
+  pad.addEventListener('click',()=>{
+    const nowOn=activeRegions.has(r);
+    if(nowOn){activeRegions.delete(r);pad.classList.replace('region-on','region-off');if(isCustom){pad.style.background=CUSTOM_OFF;pad.style.borderColor='#2a4020';pad.style.color='#4a6838';}else pad.style.background=PAD_BG_OFF[idx];}
+    else{activeRegions.add(r);pad.classList.replace('region-off','region-on');if(isCustom){pad.style.background=CUSTOM_ON;pad.style.borderColor='#4a8030';pad.style.color='#80d060';}else pad.style.background=PAD_BG_ON[idx];}
+  });
+  return pad;
+}
+
+function addCustomPad(){
+  const input=document.getElementById('add-pad-input');
+  const val=input.value.trim();if(!val)return;
+  if(DEFAULT_REGIONS.includes(val)||customRegions.includes(val)){input.style.borderColor='#8a3020';setTimeout(()=>input.style.borderColor='#3a2410',1200);return;}
+  customRegions.push(val);activeRegions.add(val);input.value='';buildPads();
+  document.getElementById('custom-note').style.display='block';
+}
+
+function matchHeights(){
+  requestAnimationFrame(()=>{
+    const ids=['ch1','mixer','ch2','side-left','side-right'];
+    const els=ids.map(id=>document.getElementById(id));
+    els.forEach(el=>{if(el)el.style.height='auto';});
+    const h=Math.max(...els.filter(Boolean).map(el=>el.scrollHeight));
+    els.forEach(el=>{if(el)el.style.height=h+'px';});
+    const fH=Math.max(100,h-90);
+    [2,3,7].forEach(id=>{const t=document.getElementById('fader-track-'+id);if(t)t.style.height=fH+'px';});
+    const et=document.getElementById('entropy-track');if(et)et.style.height=Math.max(80,fH-20)+'px';
+  });
+}
+
+function initBoard(){
+  KNOB_IDS.forEach(id=>{
+    drawKnob(id,vals[id],id===1);
+    const c=document.getElementById('knob-'+id);
+    c.addEventListener('mousedown',e=>{dragging={id,type:'knob'};dragY0=e.clientY;dragV0=vals[id];e.preventDefault()});
+    c.addEventListener('touchstart',e=>{dragging={id,type:'knob'};dragY0=e.touches[0].clientY;dragV0=vals[id]},{passive:true});
+  });
+  [2,3,7].forEach(id=>{
+    const thumb=document.getElementById('fader-thumb-'+id);
+    const track=document.getElementById('fader-track-'+id);
+    thumb.addEventListener('mousedown',e=>{dragging={id,type:'fader',track};dragY0=e.clientY;dragV0=vals[id];thumb.classList.add('dragging');e.preventDefault()});
+    thumb.addEventListener('touchstart',e=>{dragging={id,type:'fader',track};dragY0=e.touches[0].clientY;dragV0=vals[id];thumb.classList.add('dragging')},{passive:true});
+  });
+  const et=document.getElementById('entropy-track'),ethumb=document.getElementById('entropy-thumb');
+  ethumb.addEventListener('mousedown',e=>{dragging={type:'entropy',track:et};dragY0=e.clientY;dragV0=entropyVal;e.preventDefault()});
+  ethumb.addEventListener('touchstart',e=>{dragging={type:'entropy',track:et};dragY0=e.touches[0].clientY;dragV0=entropyVal},{passive:true});
+  buildPads();
+  setTimeout(matchHeights,100);
+}
+
+function onMove(cy){
+  if(!dragging)return;
+  const{id,type,track}=dragging;
+  if(type==='knob'){
+    vals[id]=Math.max(0,Math.min(100,Math.round(dragV0+(dragY0-cy)*1.2)));
+    drawKnob(id,vals[id],id===1);
+    document.getElementById('cv-'+id).textContent=vals[id];
+  }else if(type==='fader'){
+    const th=track.offsetHeight-18;
+    vals[id]=Math.max(0,Math.min(100,Math.round(dragV0+((dragY0-cy)/th)*100)));
+    document.getElementById('fader-thumb-'+id).style.bottom='calc('+vals[id]+'% - 9px)';
+    document.getElementById('cv-'+id).textContent=vals[id];
+  }else if(type==='entropy'){
+    const th=track.offsetHeight-18;
+    entropyVal=Math.max(0,Math.min(100,Math.round(dragV0+((dragY0-cy)/th)*100)));
+    document.getElementById('entropy-thumb').style.bottom='calc('+entropyVal+'% - 9px)';
+    document.getElementById('entropy-val').textContent=entropyVal;
+  }
+}
+function stopDrag(){
+  if(dragging&&dragging.type==='fader'){const t=document.getElementById('fader-thumb-'+dragging.id);if(t)t.classList.remove('dragging');}
+  dragging=null;
+}
+document.addEventListener('mousemove',e=>onMove(e.clientY));
+document.addEventListener('touchmove',e=>onMove(e.touches[0].clientY),{passive:true});
+document.addEventListener('mouseup',stopDrag);
+document.addEventListener('touchend',stopDrag);
+
+function trainModel(){
+  myStationName=document.getElementById('station-name').value.trim()||'Unnamed Station';
+  const regs=Array.from(activeRegions);
+  const mode=archiveMode?'Archive':'Contemporary';
+  document.getElementById('train-confirm-text').textContent='"'+myStationName+'" · '+mode+' · '+(regs.slice(0,2).join(' & ')||'Global');
+  document.getElementById('train-success').style.display='block';
+  populateBroadcast();
+}
+function populateBroadcast(){
+  document.getElementById('no-station-msg').style.display='none';
+  document.getElementById('broadcast-content').style.display='block';
+  document.getElementById('bc-name').textContent=myStationName;
+  const r=Array.from(activeRegions);
+  const mode=archiveMode?'Archive':'Contemporary';
+  document.getElementById('bc-meta').textContent=mode+' · '+(r.slice(0,2).join(' & ')||'Global');
+  updateTrackDisplay();buildQueue();
+}
+function updateTrackDisplay(){
+  const t=TRACKS[currentTrack%TRACKS.length];
+  document.getElementById('bc-track').textContent=t.title;
+  document.getElementById('bc-region').textContent=t.region;
+  document.getElementById('bc-genre').textContent=t.genre;
+}
+function buildQueue(){
+  const el=document.getElementById('queue-list');el.innerHTML='';
+  [...TRACKS.slice(currentTrack+1),...TRACKS.slice(0,currentTrack)].slice(0,6).forEach((t,i)=>{
+    const d=document.createElement('div');d.className='queue-item';
+    d.innerHTML=`<span class="q-num">${String(i+1).padStart(2,'0')}</span><span class="q-title">${t.title}</span><span class="q-origin">${t.region}</span><span class="q-dur">${t.dur}</span>`;
+    d.onclick=()=>{currentTrack=TRACKS.indexOf(t);updateTrackDisplay();buildQueue();progress=0;};
+    el.appendChild(d);
+  });
+}
+function togglePlay(){
+  playing=!playing;
+  document.getElementById('play-btn').textContent=playing?'⏸':'▶';
+  if(playing){
+    progressInterval=setInterval(()=>{
+      progress=(progress+0.5)%100;
+      document.getElementById('progress-fill').style.width=progress+'%';
+      if(progress<1){currentTrack=(currentTrack+1)%TRACKS.length;updateTrackDisplay();buildQueue();}
+    },200);
+    animateWave();
+  }else clearInterval(progressInterval);
+}
+function prevTrack(){currentTrack=(currentTrack-1+TRACKS.length)%TRACKS.length;progress=0;updateTrackDisplay();buildQueue();}
+function nextTrack(){currentTrack=(currentTrack+1)%TRACKS.length;progress=0;updateTrackDisplay();buildQueue();}
+function animateWave(){
+  const canvas=document.getElementById('waveform-canvas');if(!canvas)return;
+  const W=canvas.offsetWidth||400;canvas.width=W;
+  const ctx=canvas.getContext('2d');
+  function frame(){
+    if(!playing){ctx.clearRect(0,0,W,44);return;}
+    ctx.fillStyle='#0e0a04';ctx.fillRect(0,0,W,44);
+    wavePhase+=0.07;
+    const bars=56,bw=W/bars;
+    for(let i=0;i<bars;i++){
+      const amp=0.2+0.8*Math.abs(Math.sin(i*0.38+wavePhase)*Math.cos(i*0.13+wavePhase*0.6));
+      const h=Math.max(2,amp*36);
+      ctx.fillStyle=i%8===0?'#e8b020':'#7a4e10';
+      ctx.fillRect(i*bw+1,(44-h)/2,bw-2,h);
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
+function buildCommunityStations(){
+  const grid=document.getElementById('stations-grid');grid.innerHTML='';
+  STATIONS.forEach(s=>{
+    const card=document.createElement('div');card.className='station-card';
+    const bars=s.dials.map(v=>`<div class="s-dial-mini"><div class="s-dial-fill" style="width:${v}%"></div></div>`).join('');
+    const tags=s.tags.map(t=>`<span class="s-tag">${t}</span>`).join('');
+    card.innerHTML=`<div class="s-head"><div class="s-icon">${s.icon}</div><div><div class="s-name">${s.name}</div><div class="s-curator">curated by ${s.curator}</div></div></div><div class="s-bio">${s.bio}</div><div class="s-tags">${tags}</div><div style="font-size:9px;color:#4a3818;font-family:'Courier New',monospace;letter-spacing:2px;margin-bottom:6px">Model weights</div><div class="s-dial-row">${bars}</div><button onclick="tuneIn('${s.name}')" style="width:100%;padding:10px;margin-top:12px;background:#d4b060;border:2px solid #c09020;border-radius:5px;color:#0e0800;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-family:'Courier New',monospace;cursor:pointer;font-weight:bold;transition:background 0.15s" onmouseover="this.style.background='#f8e060'" onmouseout="this.style.background='#d4b060'">→ Load &amp; remix</button>`;
+    grid.appendChild(card);
+  });
+}
+function tuneIn(name){
+  const s=STATIONS.find(x=>x.name===name);if(!s)return;
+  vals={0:s.dials[0],1:s.dials[1],2:s.dials[2],3:s.dials[3],5:s.dials[4],6:s.dials[5],7:s.dials[6]};
+  KNOB_IDS.forEach(id=>{drawKnob(id,vals[id],id===1);document.getElementById('cv-'+id).textContent=vals[id];});
+  [2,3,7].forEach(id=>{document.getElementById('fader-thumb-'+id).style.bottom='calc('+vals[id]+'% - 9px)';document.getElementById('cv-'+id).textContent=vals[id];});
+  document.getElementById('station-name').value=s.name+' (remix)';
+  switchTab('build');
+}
+function switchTab(name){
+  ['build','broadcast','tunein'].forEach(n=>{
+    const btn=document.getElementById('tab-btn-'+n);
+    const active=n===name;
+    btn.style.background=active?'#f8e060':'#c8a050';
+    btn.style.color='#1a0800';
+    btn.style.borderColor=active?'#c09020':'#8a6820';
+    document.getElementById('tab-'+n).classList.toggle('active',active);
+  });
+}
+initBoard();
+buildCommunityStations();
+</script>
